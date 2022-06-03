@@ -7,12 +7,12 @@ module.exports = async ({ getNamedAccounts, deployments }: any) => {
   const { deployer } = await getNamedAccounts();
 
   // Config
-  console.log(`Deploying NFTLendingPool Contract... from ${deployer}`);
+  console.log(`Deploying USDC Contract... from ${deployer}`);
 
-  let NFTLendingPool = await deploy("NFTLendingPool", {
+  let USDC = await deploy("USDC", {
     from: deployer,
     args: [],
   });
 };
 
-module.exports.tags = ["NFTLendingPool"];
+module.exports.tags = ["USDC"];
