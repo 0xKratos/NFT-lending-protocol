@@ -80,7 +80,11 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
     function _removeCollateral(IERC721 _collectionAddress, uint256 _id) private{
         _collectionAddress.safeTransferFrom(address(this),msg.sender,_id);
     }
-    function _calculateRepayment(Loan loan) private returns (uint256);
+    function _calculatePayment(Loan loan) private returns (uint256){
+        uint256 timePassed = _calculateTimePassed(loan.startTime);
+        uint256 interest = (loan.principal * interestRateMolecular * timePassed) / (365 days * interestRateDenominator);
+        return loan.principal + interest;
+    }
 
     function _calculateTimePassed(uint256 startTime) private returns(uint256);
 
