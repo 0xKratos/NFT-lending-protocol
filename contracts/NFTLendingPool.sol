@@ -86,7 +86,9 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
         return loan.principal + interest;
     }
 
-    function _calculateTimePassed(uint256 startTime) private returns(uint256);
+    function _calculateTimePassed(uint256 startTime) private returns(uint256){
+        return block.timestamp - startTime;
+    }
 
 
 }
