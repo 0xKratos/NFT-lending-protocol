@@ -70,6 +70,10 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
         _removeCollateral(IERC721(loan.collateralCollectionAddress), loan.collateralTokenId);
         emit Liquidate(msg.sender, loan.borrower, payment, loan.collateralCollectionAddress, loan.collateralTokenId);
     }
+    function canLiquidate(uint256 _loanId) public view returns (bool) {
+        Loan memory loan = loans[_loanId];
+        return block.timestamp >= loan.endTime;
+    }
     function _addCollateral(IERC721 _collectionAddress, uint256 _id) private {
         _collectionAddress.safeTransferFrom(msg.sender,address(this),_id);
     }
