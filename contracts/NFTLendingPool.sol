@@ -35,8 +35,8 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
     mapping(uint256 => Loan) public loans;
     uint256 public loanCounter = 0;
     event Borrow(address indexed borrower, uint256 indexed loanId, uint256 amountBorrowed, uint256 startTime, uint256 endTime);
-    event Repay();
-    event Liquidate();
+    event Repay(address indexed borrower, uint256 indexed loanId, uint256 amountRepaid);
+    event Liquidate(address indexed liquidator, address indexed liquidatee, uint256 amountPaid, address collateralCollectionAddress, uint256 collateralTokenId);
 
     // Functions
     constructor(address _usdc, uint256 _interestRateMolecular, uint256 _interestRateDenominator){
@@ -47,7 +47,7 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
     
     function borrow(uint256 _amount, IERC721 _collectionAddress, uint256 _id, uint256 _price) external {
         _addCollateral(_collectionAddress, _id);
-        require(_amount * maxLoanDenominator <= _price  * maxLoanMolecular, "NFTLendingPool: Principal must be less than maximum loan amount");
+        require(_amount * maxLoanDenominator <= _price  * maxLoanMolecular, "NFTLendingPool: Principal must be less than maximum loan amount.");
         USDC.safeTransfer(msg.sender,_amount);
         loans[loanCounter] = Loan(msg.sender, _collectionAddress, _id, _price, _amount, block.timestamp, block.timestamp+loanPeriod);
         loanCounter++;
