@@ -22,29 +22,43 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
         uint256 endTime;
     }
 
-
-
     uint256 public interestRateMolecular;
     uint256 public interestRateDenominator;
     IERC20 public USDC;
     uint256 public maxLoanMolecular = 7;
     uint256 public maxLoanDenominator = 10;
     uint256 public loanPeriod = 1 days;
-
-
     mapping(uint256 => Loan) public loans;
     uint256 public loanCounter = 0;
+
+    // Events
     event Borrow(address indexed borrower, uint256 indexed loanId, uint256 amountBorrowed, uint256 startTime, uint256 endTime);
     event Repay(address indexed borrower, uint256 indexed loanId, uint256 amountRepaid);
     event Liquidate(address indexed liquidator, address indexed liquidatee, uint256 amountPaid, address collateralCollectionAddress, uint256 collateralTokenId);
 
-    // Functions
+
     constructor(address _usdc, uint256 _interestRateMolecular, uint256 _interestRateDenominator){
         interestRateMolecular = _interestRateMolecular;
         interestRateDenominator = _interestRateDenominator;
         USDC = IERC20(_usdc);
     }
-    
+
+    // Admin functions
+
+    function setMaxLoan(uint256 _maxLoanMolecular, uint256 _maxLoanDenominator) external onlyOwner{
+        maxLoanMolecular = _maxLoanMolecular;
+        maxLoanDenominator = _maxLoanDenominator;
+    }
+    function setInterestRate(uint256 _interestRateMolecular, uint256 _interestRateDenominator) external onlyOwner{
+        interestRateMolecular = _interestRateMolecular;
+        interestRateDenominator = _interestRateDenominator;
+    }
+
+    function setLoanPeriod(uint256 _loanPeriod) external onlyOwner{
+        loanPeriod = _loadPeriod;
+    }
+
+    // Core Functions
     function borrow(uint256 _amount, IERC721 _collectionAddress, uint256 _id, uint256 _price) external {
         _addCollateral(_collectionAddress, _id);
         require(_amount * maxLoanDenominator <= _price  * maxLoanMolecular, "NFTLendingPool: Principal must be less than maximum loan amount.");
