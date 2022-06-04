@@ -5,22 +5,15 @@ import "./interface/INFTLendingPool.sol";
 import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownable
 
 {
+    using SafeERC20 for IERC20;
     // Variables
-    struct Loan {
-        address borrower;
-        address collateralCollectionAddress;
-        uint256 collateralTokenId;
-        uint256 collateralPrice;
-        uint256 principal;
-        uint256 startTime;
-        uint256 endTime;
-    }
 
     uint256 public interestRateMolecular;
     uint256 public interestRateDenominator;
@@ -55,7 +48,7 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
     }
 
     function setLoanPeriod(uint256 _loanPeriod) external onlyOwner{
-        loanPeriod = _loadPeriod;
+        loanPeriod = _loanPeriod;
     }
 
     // Core Functions
@@ -63,13 +56,13 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
         _addCollateral(_collectionAddress, _id);
         require(_amount * maxLoanDenominator <= _price  * maxLoanMolecular, "NFTLendingPool: Principal must be less than maximum loan amount.");
         USDC.safeTransfer(msg.sender,_amount);
-        loans[loanCounter] = Loan(msg.sender, _collectionAddress, _id, _price, _amount, block.timestamp, block.timestamp+loanPeriod);
+        loans[loanCounter] = Loan(msg.sender, address(_collectionAddress), _id, _price, _amount, block.timestamp, block.timestamp+loanPeriod);
         loanCounter++;
         emit Borrow(msg.sender, _id, _amount, block.timestamp, block.timestamp+loanPeriod);
 
     }
     function repay(uint256 _loanId) external {
-        Loans memory loan = loans[loanId];
+        Loan memory loan = loans[_loanId];
         require(loan.borrower == msg.sender, "NFTLendingPool: Only borrower can repay loan!");
         uint256 repaymentAmount = _calculatePayment(loan);
         USDC.safeTransferFrom(msg.sender,address(this),repaymentAmount);
@@ -94,13 +87,13 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
     function _removeCollateral(IERC721 _collectionAddress, uint256 _id) private{
         _collectionAddress.safeTransferFrom(address(this),msg.sender,_id);
     }
-    function _calculatePayment(Loan loan) private returns (uint256){
+    function _calculatePayment(Loan memory loan) private view returns (uint256){
         uint256 timePassed = _calculateTimePassed(loan.startTime);
         uint256 interest = (loan.principal * interestRateMolecular * timePassed) / (365 days * interestRateDenominator);
         return loan.principal + interest;
     }
 
-    function _calculateTimePassed(uint256 startTime) private returns(uint256){
+    function _calculateTimePassed(uint256 startTime) private view returns(uint256){
         return block.timestamp - startTime;
     }
 
