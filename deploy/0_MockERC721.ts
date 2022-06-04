@@ -13,6 +13,8 @@ module.exports = async ({ getNamedAccounts, deployments }: any) => {
     from: deployer,
     args: [],
   });
+  console.log(`Deployed MockERC721 at ${MockERC721.address}`);
 };
+  
 
 module.exports.tags = ["MockERC721"];

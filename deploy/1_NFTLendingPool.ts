@@ -14,7 +14,7 @@ module.exports = async ({ getNamedAccounts, deployments }: any) => {
     from: deployer,
     args: [usdc.address, 1, 10],
   });
-
+  console.log(`Deployed NFTLendingPool at ${NFTLendingPool.address}`);
   
 };
 

@@ -13,6 +13,7 @@ module.exports = async ({ getNamedAccounts, deployments }: any) => {
     from: deployer,
     args: [],
   });
+  console.log(`Deployed USDC at ${USDC.address}`);
 };
 
 module.exports.tags = ["USDC"];
