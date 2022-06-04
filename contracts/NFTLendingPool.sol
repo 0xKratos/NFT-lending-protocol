@@ -23,7 +23,7 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
     uint256 public loanPeriod = 1 days;
     mapping(uint256 => Loan) public loans;
     uint256 public loanCounter = 0;
-
+    
     // Events
     event Borrow(address indexed borrower, uint256 indexed loanId, uint256 amountBorrowed, uint256 startTime, uint256 endTime);
     event Repay(address indexed borrower, uint256 indexed loanId, uint256 amountRepaid);
@@ -52,7 +52,7 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
     }
 
     // Core Functions
-    function borrow(uint256 _amount, IERC721 _collectionAddress, uint256 _id, uint256 _price) external {
+    function borrow(uint256 _amount, IERC721 _collectionAddress, uint256 _id, uint256 _price) external nonReentrant {
         _addCollateral(_collectionAddress, _id);
         require(_amount * maxLoanDenominator <= _price  * maxLoanMolecular, "NFTLendingPool: Principal must be less than maximum loan amount.");
         USDC.safeTransfer(msg.sender,_amount);
@@ -61,7 +61,7 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
         emit Borrow(msg.sender, _id, _amount, block.timestamp, block.timestamp+loanPeriod);
 
     }
-    function repay(uint256 _loanId) external {
+    function repay(uint256 _loanId) external nonReentrant{
         Loan memory loan = loans[_loanId];
         require(loan.borrower == msg.sender, "NFTLendingPool: Only borrower can repay loan!");
         uint256 repaymentAmount = _calculatePayment(loan);
@@ -69,7 +69,7 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
         _removeCollateral(IERC721(loan.collateralCollectionAddress), loan.collateralTokenId);
         emit Repay(msg.sender, _loanId, repaymentAmount);
     }
-    function liquidate(uint256 _loanId) external {
+    function liquidate(uint256 _loanId) external nonReentrant{
         require(canLiquidate(_loanId), "NFTLendingPool: Loan cannot be liquidated.");
         Loan memory loan = loans[_loanId];
         uint256 payment = _calculatePayment(loan);
@@ -77,6 +77,7 @@ contract NFTLendingPool is INFTLendingPool, ERC721Holder, ReentrancyGuard, Ownab
         _removeCollateral(IERC721(loan.collateralCollectionAddress), loan.collateralTokenId);
         emit Liquidate(msg.sender, loan.borrower, payment, loan.collateralCollectionAddress, loan.collateralTokenId);
     }
+
     function canLiquidate(uint256 _loanId) public view returns (bool) {
         Loan memory loan = loans[_loanId];
         return block.timestamp >= loan.endTime;
