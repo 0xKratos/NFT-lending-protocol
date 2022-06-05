@@ -35,13 +35,13 @@ if (process.env.PRIVATE_KEY) {
   PRIVATE_KEY = ethers.Wallet.createRandom()._signingKey().privateKey;
 }
 
-if (!process.env.INFURA_API_KEY) {
-  console.log("⚠️ Please set INFURA_API_KEY in the .env file");
-}
+// if (!process.env.INFURA_API_KEY) {
+//   console.log("⚠️ Please set INFURA_API_KEY in the .env file");
+// }
 
-if (!process.env.ETHERSCAN_API_KEY) {
-  console.log("⚠️ Please set ETHERSCAN_API_KEY in the .env file");
-}
+// if (!process.env.ETHERSCAN_API_KEY) {
+//   console.log("⚠️ Please set ETHERSCAN_API_KEY in the .env file");
+// }
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
