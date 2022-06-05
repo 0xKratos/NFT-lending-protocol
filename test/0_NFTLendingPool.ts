@@ -58,7 +58,7 @@ describe("NFT lending protocol contract", function () {
   });
 
   describe("Borrower", function () {
-    it("should borrow sufficient amount and successfully deposit NFT", async function () {
+    it("should borrow specified amount and successfully deposit NFT", async function () {
       await nft.connect(owner).approve(lendingPool.address, 1);
       await lendingPool.connect(owner).borrow(ethers.utils.parseEther("3000"), nft.address,1, ethers.utils.parseEther("10000"));
       expect(await usdc.balanceOf(owner.address)).to.equal(ethers.utils.parseEther("10000000").add(ethers.utils.parseEther("3000")));
